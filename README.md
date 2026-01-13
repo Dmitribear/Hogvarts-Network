@@ -1,4 +1,4 @@
-Hogwarts Network
+Hogwarts Network                                                                                                             Кондрашов Сибирцев 9-3-ПО-22
 
 Hogwarts Network is a fan-made mobile application for fans of Harry Potter.
 The app brings the wizarding world closer by combining lore, characters, and interactive features in one place.
