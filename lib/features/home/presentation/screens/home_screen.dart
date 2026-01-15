@@ -12,28 +12,26 @@ class HomeScreen extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              // Общий фон: атмосфера Хогвартса, тёплый вечер
-              'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1600&q=80',
-            ),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: _AssetImage(asset: 'assets/images/bg_main.jpg', fit: BoxFit.cover),
           ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.black.withOpacity(0.68),
-                Colors.black.withOpacity(0.42),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.68),
+                    Colors.black.withOpacity(0.42),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
             ),
           ),
-          child: SafeArea(
+          SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
@@ -43,7 +41,11 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _HeroCard(textTheme: textTheme),
                   const SizedBox(height: 18),
-                  _InfoRow(textTheme: textTheme),
+                  _InfoRow(
+                    textTheme: textTheme,
+                    onCourses: () => context.push('/home/library'),
+                    onJoin: () => context.push('/home/profile'),
+                  ),
                   const SizedBox(height: 18),
                   _TilesGrid(onNavigate: (route) => context.push(route)),
                   const SizedBox(height: 22),
@@ -54,9 +56,26 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
+        ],
       ),
-      bottomNavigationBar: const _BottomNav(),
+      bottomNavigationBar: _BottomNav(
+        onTab: (index) {
+          switch (index) {
+            case 0:
+              context.go('/home');
+              break;
+            case 1:
+              context.go('/home/tasks');
+              break;
+            case 2:
+              context.go('/home/messages');
+              break;
+            case 3:
+              context.go('/home/shop');
+              break;
+          }
+        },
+      ),
     );
   }
 }
@@ -86,13 +105,13 @@ class _TopBar extends StatelessWidget {
         ),
         Wrap(
           spacing: 16,
-          children: const [
-            _TopLink(label: 'Новости'),
-            _TopLink(label: 'Курсы'),
-            _TopLink(label: 'Форум'),
-            _TopLink(label: 'Магазин'),
-            _TopLink(label: 'Профиль'),
-            _TopLink(label: 'Выход'),
+          children: [
+            _TopLink(label: 'Новости', onTap: () => context.go('/home/news')),
+            _TopLink(label: 'Курсы', onTap: () => context.go('/home/library')),
+            _TopLink(label: 'Форум', onTap: () => context.go('/home/forum')),
+            _TopLink(label: 'Магазин', onTap: () => context.go('/home/shop')),
+            _TopLink(label: 'Профиль', onTap: () => context.go('/home/profile')),
+            _TopLink(label: 'Выход', onTap: () => Navigator.of(context).pop()),
           ],
         ),
       ],
@@ -101,18 +120,22 @@ class _TopBar extends StatelessWidget {
 }
 
 class _TopLink extends StatelessWidget {
-  const _TopLink({required this.label});
+  const _TopLink({required this.label, required this.onTap});
 
   final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.parchment,
-            fontWeight: FontWeight.w600,
-          ),
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.parchment.withOpacity(0.9),
+              fontWeight: FontWeight.w600,
+            ),
+      ),
     );
   }
 }
@@ -128,13 +151,13 @@ class _HeroCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Stack(
         children: [
-          SizedBox(
+          const SizedBox(
             width: double.infinity,
             height: 260,
-            child: Image.network(
-              // Основной hero фон: ночной замок
-              'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80',
+            child: _AssetImage(
+              asset: 'assets/images/hero_castle.jpg',
               fit: BoxFit.cover,
+              height: 260,
             ),
           ),
           Positioned.fill(
@@ -200,17 +223,33 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.textTheme});
+  const _InfoRow({
+    required this.textTheme,
+    required this.onCourses,
+    required this.onJoin,
+  });
 
   final TextTheme textTheme;
+  final VoidCallback onCourses;
+  final VoidCallback onJoin;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _InfoChip(textTheme: textTheme, icon: Icons.auto_stories, label: 'Изучить курсы'),
+        _InfoChip(
+          textTheme: textTheme,
+          icon: Icons.auto_stories,
+          label: 'Изучить курсы',
+          onTap: onCourses,
+        ),
         const SizedBox(width: 10),
-        _InfoChip(textTheme: textTheme, icon: Icons.forum, label: 'Присоединиться'),
+        _InfoChip(
+          textTheme: textTheme,
+          icon: Icons.forum,
+          label: 'Присоединиться',
+          onTap: onJoin,
+        ),
       ],
     );
   }
@@ -221,30 +260,36 @@ class _InfoChip extends StatelessWidget {
     required this.textTheme,
     required this.icon,
     required this.label,
+    required this.onTap,
   });
 
   final TextTheme textTheme;
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.parchment, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(color: AppColors.parchment),
-          ),
-        ],
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.12)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.parchment, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: textTheme.bodyMedium?.copyWith(color: AppColors.parchment),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -296,8 +341,7 @@ class _TilesGrid extends StatelessWidget {
               _TileCard(
                 title: 'Курсы Магии',
                 subtitle: 'Онлайн-уроки и задания',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1455884981818-54cb785db6fc?auto=format&fit=crop&w=1200&q=80',
+                imageAsset: 'assets/images/card_courses.jpg',
                 onTap: () => onNavigate('/home/library'),
                 width: cardWidth,
               ),
@@ -305,18 +349,16 @@ class _TilesGrid extends StatelessWidget {
               _TileCard(
                 title: 'Новости',
                 subtitle: 'Свежие новости из мира магии',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=1200&q=80',
-                onTap: () => onNavigate('/home/library'),
+                imageAsset: 'assets/images/card_news.jpg',
+                onTap: () => onNavigate('/home/news'),
                 width: cardWidth,
               ),
               const SizedBox(width: 8),
               _TileCard(
                 title: 'Форум',
                 subtitle: 'Общение с волшебниками',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=1200&q=80',
-                onTap: () => onNavigate('/home/profile'),
+                imageAsset: 'assets/images/card_forum.jpg',
+                onTap: () => onNavigate('/home/forum'),
                 width: cardWidth,
               ),
             ],
@@ -331,14 +373,14 @@ class _TileCard extends StatelessWidget {
   const _TileCard({
     required this.title,
     required this.subtitle,
-    required this.imageUrl,
+    required this.imageAsset,
     required this.onTap,
     required this.width,
   });
 
   final String title;
   final String subtitle;
-  final String imageUrl;
+  final String imageAsset;
   final double width;
   final VoidCallback onTap;
 
@@ -351,45 +393,52 @@ class _TileCard extends StatelessWidget {
       child: Ink(
         width: width,
         height: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              colors: [
-                Colors.black.withOpacity(0.65),
-                Colors.black.withOpacity(0.2),
-              ],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-            ),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              Text(
-                title,
-                style: textTheme.titleMedium
-                    ?.copyWith(color: AppColors.parchment),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: _AssetImage(asset: imageAsset, fit: BoxFit.cover),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: textTheme.bodySmall?.copyWith(
-                  color: AppColors.parchment.withOpacity(0.85),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.65),
+                      Colors.black.withOpacity(0.2),
+                    ],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                  border: Border.all(color: Colors.white.withOpacity(0.12)),
                 ),
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Spacer(),
+                  Text(
+                    title,
+                    style: textTheme.titleMedium
+                        ?.copyWith(color: AppColors.parchment),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.parchment.withOpacity(0.85),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -413,46 +462,50 @@ class _NewsRow extends StatelessWidget {
       children: _items
           .map(
             (e) => Expanded(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 6),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.45),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.15)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1F2538), Color(0xFF0F1325)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => Navigator.of(context).pushNamed('/home/news'),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.45),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withOpacity(0.15)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF1F2538), Color(0xFF0F1325)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.photo, color: AppColors.gold),
                         ),
                       ),
-                      child: const Center(
-                        child: Icon(Icons.photo, color: AppColors.gold),
+                      const SizedBox(height: 10),
+                      Text(
+                        e.$1,
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: AppColors.parchment),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      e.$1,
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: AppColors.parchment),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      e.$2,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.parchment.withOpacity(0.7),
+                      Text(
+                        e.$2,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: AppColors.parchment.withOpacity(0.7),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -506,7 +559,9 @@ class _SecondaryButton extends StatelessWidget {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav();
+  const _BottomNav({required this.onTab});
+
+  final ValueChanged<int> onTab;
 
   @override
   Widget build(BuildContext context) {
@@ -525,7 +580,36 @@ class _BottomNav extends StatelessWidget {
         BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag_outlined), label: 'Магазин'),
       ],
-      onTap: (index) {},
+      onTap: onTab,
+    );
+  }
+}
+
+class _AssetImage extends StatelessWidget {
+  const _AssetImage({
+    required this.asset,
+    this.fit,
+    this.height,
+    this.width,
+  });
+
+  final String asset;
+  final BoxFit? fit;
+  final double? height;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      fit: fit,
+      height: height,
+      width: width,
+      errorBuilder: (context, _, __) => Container(
+        height: height,
+        width: width,
+        color: Colors.black.withOpacity(0.3),
+      ),
     );
   }
 }
