@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../widgets/app_bottom_nav.dart';
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});
@@ -43,6 +44,7 @@ class ShopScreen extends StatelessWidget {
           return _ShopCard(item: item, textTheme: textTheme);
         },
       ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
     );
   }
 }

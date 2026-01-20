@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../widgets/app_bottom_nav.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,23 +11,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final isMobile = MediaQuery.of(context).size.width < 720;
 
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: _AssetImage(asset: 'assets/images/bg_main.jpg', fit: BoxFit.cover),
-          ),
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.68),
-                    Colors.black.withOpacity(0.42),
+                    Color(0xFF0B1029),
+                    Color(0xFF0E1538),
+                    Color(0xFF181D3F),
                   ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
             ),
@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _TopBar(textTheme: textTheme),
+                  _TopBar(textTheme: textTheme, isMobile: isMobile),
                   const SizedBox(height: 12),
                   _HeroCard(textTheme: textTheme),
                   const SizedBox(height: 18),
@@ -52,41 +52,88 @@ class HomeScreen extends StatelessWidget {
                   _SectionHeader(textTheme: textTheme, title: 'Последние новости'),
                   const SizedBox(height: 12),
                   _NewsRow(),
+                  const SizedBox(height: 22),
+                  _SectionHeader(textTheme: textTheme, title: 'Возможности для вас'),
+                  const SizedBox(height: 12),
+                  _FeaturesList(textTheme: textTheme),
                 ],
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: _BottomNav(
-        onTab: (index) {
-          switch (index) {
-            case 0:
-              context.go('/home');
-              break;
-            case 1:
-              context.go('/home/tasks');
-              break;
-            case 2:
-              context.go('/home/messages');
-              break;
-            case 3:
-              context.go('/home/shop');
-              break;
-          }
-        },
-      ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
     );
   }
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.textTheme});
+  const _TopBar({required this.textTheme, required this.isMobile});
 
   final TextTheme textTheme;
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
+    final menu = [
+      ('Новости', '/home/news'),
+      ('Курсы', '/home/library'),
+      ('Форум', '/home/forum'),
+      ('Магазин', '/home/shop'),
+      ('Профиль', '/home/profile'),
+    ];
+
+    if (isMobile) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.castle, color: AppColors.gold, size: 24),
+              const SizedBox(width: 10),
+              Text(
+                'Hogwarts Network',
+                style: textTheme.titleMedium?.copyWith(
+                  color: AppColors.parchment.withOpacity(0.9),
+                  letterSpacing: 1.05,
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.menu, color: AppColors.parchment),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: const Color(0xFF0F1324),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (_) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: menu
+                      .map(
+                        (m) => ListTile(
+                          title: Text(
+                            m.$1,
+                            style: textTheme.titleMedium
+                                ?.copyWith(color: AppColors.parchment),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.go(m.$2);
+                          },
+                        ),
+                      )
+                      .toList(),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -105,14 +152,11 @@ class _TopBar extends StatelessWidget {
         ),
         Wrap(
           spacing: 16,
-          children: [
-            _TopLink(label: 'Новости', onTap: () => context.go('/home/news')),
-            _TopLink(label: 'Курсы', onTap: () => context.go('/home/library')),
-            _TopLink(label: 'Форум', onTap: () => context.go('/home/forum')),
-            _TopLink(label: 'Магазин', onTap: () => context.go('/home/shop')),
-            _TopLink(label: 'Профиль', onTap: () => context.go('/home/profile')),
-            _TopLink(label: 'Выход', onTap: () => Navigator.of(context).pop()),
-          ],
+          children: menu
+              .map(
+                (m) => _TopLink(label: m.$1, onTap: () => context.go(m.$2)),
+              )
+              .toList(),
         ),
       ],
     );
@@ -151,28 +195,25 @@ class _HeroCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Stack(
         children: [
-          const SizedBox(
+          Container(
             width: double.infinity,
             height: 260,
-            child: _AssetImage(
-              asset: 'assets/images/hero_castle.jpg',
-              fit: BoxFit.cover,
-              height: 260,
-            ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withOpacity(0.75),
-                    Colors.black.withOpacity(0.25),
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF1A1F4B),
+                  Color(0xFF2A2E64),
+                  Color(0xFF3D2A7A),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
+          ),
+          const Positioned(
+            right: 16,
+            top: 14,
+            child: Icon(Icons.shield, color: AppColors.gold),
           ),
           Positioned(
             left: 20,
@@ -182,12 +223,12 @@ class _HeroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Добро пожаловать в',
+                  'Официальный портал',
                   style: textTheme.titleMedium
-                      ?.copyWith(color: AppColors.parchment),
+                      ?.copyWith(color: AppColors.parchment.withOpacity(0.9)),
                 ),
                 Text(
-                  'Hogwarts Network',
+                  'Wizarding World',
                   style: textTheme.headlineLarge?.copyWith(
                     color: AppColors.parchment,
                     letterSpacing: 1.2,
@@ -195,7 +236,7 @@ class _HeroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Откройте мир волшебства!',
+                  'Новости, истории, события и уникальный контент\nвдохновлённый миром волшебства.',
                   style: textTheme.bodyLarge
                       ?.copyWith(color: AppColors.parchment.withOpacity(0.9)),
                 ),
@@ -203,12 +244,12 @@ class _HeroCard extends StatelessWidget {
                 Row(
                   children: [
                     _PrimaryButton(
-                      label: 'Изучить курсы',
+                      label: 'Войти в мир магии',
                       onTap: () => context.push('/home/library'),
                     ),
                     const SizedBox(width: 12),
                     _SecondaryButton(
-                      label: 'Присоединиться',
+                      label: 'Профиль',
                       onTap: () => context.push('/home/profile'),
                     ),
                   ],
@@ -339,32 +380,81 @@ class _TilesGrid extends StatelessWidget {
           child: Row(
             children: [
               _TileCard(
-                title: 'Курсы Магии',
-                subtitle: 'Онлайн-уроки и задания',
+                title: 'Персонажи',
+                subtitle: 'Поиск героев и статистика',
                 imageAsset: 'assets/images/card_courses.jpg',
                 onTap: () => onNavigate('/home/library'),
                 width: cardWidth,
               ),
               const SizedBox(width: 8),
               _TileCard(
-                title: 'Новости',
-                subtitle: 'Свежие новости из мира магии',
+                title: 'Книга и лор',
+                subtitle: 'Читай и изучай вселенную',
                 imageAsset: 'assets/images/card_news.jpg',
                 onTap: () => onNavigate('/home/news'),
-                width: cardWidth,
-              ),
-              const SizedBox(width: 8),
-              _TileCard(
-                title: 'Форум',
-                subtitle: 'Общение с волшебниками',
-                imageAsset: 'assets/images/card_forum.jpg',
-                onTap: () => onNavigate('/home/forum'),
                 width: cardWidth,
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _FeaturesList extends StatelessWidget {
+  const _FeaturesList({required this.textTheme});
+
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      ('Поиск персонажей', 'Карточки, биография, статы из API'),
+      ('Создать профиль', 'Аватар, факультет, прогресс'),
+      ('Своя палочка и Патронус', 'Персонализация и коллекции'),
+      ('Чтение книг и лор', 'Разделы книги и материалы'),
+      ('Квизы и достижения', 'Соревнуйся и получай бейджи'),
+      ('Новости и сообщество', 'События, форум, обсуждения'),
+    ];
+    return Column(
+      children: items
+          .map(
+            (e) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.04),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: AppColors.gold, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          e.$1,
+                          style: textTheme.titleSmall
+                              ?.copyWith(color: AppColors.parchment),
+                        ),
+                        Text(
+                          e.$2,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: AppColors.parchment.withOpacity(0.75),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -407,8 +497,8 @@ class _TileCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withOpacity(0.65),
-                      Colors.black.withOpacity(0.2),
+                      Colors.deepPurple.withOpacity(0.55),
+                      Colors.black.withOpacity(0.18),
                     ],
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
@@ -449,9 +539,9 @@ class _NewsRow extends StatelessWidget {
   _NewsRow({super.key});
 
   final _items = const [
-    ('Фестиваль в Хогсмиде', '21 апреля 2024'),
-    ('Новые зелеварные рецепты', '18 апреля 2024'),
-    ('Турнир по квиддичу', '15 апреля 2024'),
+    ('Обновление API персонажей', 'Свежие данные по героям'),
+    ('Квиз по заклинаниям', 'Проверь знания и заработай награды'),
+    ('Гид по Патронусам', 'Как подобрать и кастомизировать'),
   ];
 
   @override

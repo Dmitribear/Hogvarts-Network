@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../widgets/app_bottom_nav.dart';
 
 class TasksScreen extends StatelessWidget {
   const TasksScreen({super.key});
@@ -123,6 +124,7 @@ class TasksScreen extends StatelessWidget {
         label: const Text('Новый курс'),
         icon: const Icon(Icons.add),
       ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 1),
     );
   }
 }

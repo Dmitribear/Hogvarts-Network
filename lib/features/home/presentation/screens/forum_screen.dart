@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../widgets/app_bottom_nav.dart';
 
 class ForumScreen extends StatelessWidget {
   const ForumScreen({super.key});
@@ -86,6 +87,7 @@ class ForumScreen extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
     );
   }
 }

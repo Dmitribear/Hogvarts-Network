@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../widgets/app_bottom_nav.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -51,6 +52,7 @@ class MessagesScreen extends StatelessWidget {
           return _ThreadTile(item: item, textTheme: textTheme);
         },
       ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 2),
     );
   }
 }
