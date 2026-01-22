@@ -10,23 +10,29 @@ class MessagesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final threads = [
+    final forums = [
       _Thread(
-        title: 'Минерва МакГонагалл',
-        preview: 'Проверь новое расписание занятий.',
-        unread: 2,
-        time: '10:12',
+        title: 'Новости и релизы',
+        preview: 'Обсуждаем свежие статьи, книги и экранизации.',
+        unread: 12,
+        time: 'Сегодня',
       ),
       _Thread(
-        title: 'Клуб Зельеварения',
-        preview: 'Рецепт снадобья обновлён.',
+        title: 'Квизы и челленджи',
+        preview: 'Новые тесты и рейтинги участников.',
+        unread: 5,
+        time: 'Сегодня',
+      ),
+      _Thread(
+        title: 'Обсуждения лора',
+        preview: 'Вопросы по миру, теориям и фактам.',
+        unread: 3,
+        time: 'Вчера',
+      ),
+      _Thread(
+        title: 'Рекомендации книг и статей',
+        preview: 'Подборки материалов и заметок.',
         unread: 0,
-        time: '09:41',
-      ),
-      _Thread(
-        title: 'Дамблдор',
-        preview: 'Нужно обсудить турнир по квиддичу.',
-        unread: 1,
         time: 'Вчера',
       ),
     ];
@@ -34,21 +40,21 @@ class MessagesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.navy,
       appBar: AppBar(
-        title: const Text('Сообщения'),
+        title: const Text('Сообщество'),
         backgroundColor: Colors.black.withOpacity(0.6),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: AppColors.parchment),
+            icon: const Icon(Icons.add_comment, color: AppColors.parchment),
             onPressed: () {},
           ),
         ],
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: threads.length,
+        itemCount: forums.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          final item = threads[index];
+          final item = forums[index];
           return _ThreadTile(item: item, textTheme: textTheme);
         },
       ),
@@ -115,7 +121,7 @@ class _ThreadTile extends StatelessWidget {
                     style: textTheme.bodySmall?.copyWith(
                       color: AppColors.parchment.withOpacity(0.75),
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

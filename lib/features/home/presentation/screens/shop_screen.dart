@@ -10,12 +10,12 @@ class ShopScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final items = [
-      _ShopItem('Волшебная палочка', 'Остролист, сердечная жила дракона', 15),
-      _ShopItem('Мантия-невидимка', 'Лёгкая, почти невесомая', 120),
-      _ShopItem('Котёл медный', 'Стандарт 2 размера', 8),
-      _ShopItem('Метла Firebolt', 'Скорость и манёвренность', 250),
-      _ShopItem('Книга заклинаний', '5 курс, проверенный экземпляр', 22),
-      _ShopItem('Совушка', 'Надёжная почта в любую погоду', 35),
+      _ShopItem('Книга о съёмках HP', 'Артбук, 320 стр.', '1 990 ₽', 'book.jpg'),
+      _ShopItem('Постер Хогвартса', 'Формат A2, матовая бумага', '690 ₽', 'map.jpg'),
+      _ShopItem('Хогвартс-экспресс', 'Металлический значок', '490 ₽', 'train.jpg'),
+      _ShopItem('Кулинарная книга HP', 'С рецептами, полноцвет', '1 290 ₽', 'book.jpg'),
+      _ShopItem('Светильник в виде замка', 'Настольный, USB', '2 490 ₽', 'bg_main.jpg'),
+      _ShopItem('Худи фандом', 'Черный, принт Hogwarts', '3 490 ₽', 'hall.jpg'),
     ];
 
     return Scaffold(
@@ -34,9 +34,9 @@ class ShopScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.82,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+          childAspectRatio: 0.75,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
         ),
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -50,11 +50,12 @@ class ShopScreen extends StatelessWidget {
 }
 
 class _ShopItem {
-  _ShopItem(this.title, this.subtitle, this.price);
+  _ShopItem(this.title, this.subtitle, this.price, this.asset);
 
   final String title;
   final String subtitle;
-  final int price;
+  final String price;
+  final String asset;
 }
 
 class _ShopCard extends StatelessWidget {
@@ -74,29 +75,27 @@ class _ShopCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 110,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1F2538), Color(0xFF0F1325)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Image.asset(
+                  'assets/images/${item.asset}',
+                  fit: BoxFit.cover,
                 ),
               ),
-              child: const Center(
-                child: Icon(Icons.auto_awesome, color: AppColors.gold, size: 32),
-              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               item.title,
               style:
                   textTheme.titleMedium?.copyWith(color: AppColors.parchment),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
             Text(
@@ -111,7 +110,7 @@ class _ShopCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '${item.price} галлеонов',
+                  item.price,
                   style: textTheme.bodyMedium?.copyWith(
                     color: AppColors.gold,
                     fontWeight: FontWeight.w700,
@@ -119,7 +118,7 @@ class _ShopCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.add_shopping_cart,
+                  icon: const Icon(Icons.open_in_new,
                       color: AppColors.parchment),
                   onPressed: () {},
                 ),

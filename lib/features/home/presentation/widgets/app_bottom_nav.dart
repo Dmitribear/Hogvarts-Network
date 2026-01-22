@@ -18,8 +18,8 @@ class AppBottomNav extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Главная'),
-        BottomNavigationBarItem(icon: Icon(Icons.school_outlined), label: 'Задания'),
-        BottomNavigationBarItem(icon: Icon(Icons.markunread_outlined), label: 'Сообщения'),
+        BottomNavigationBarItem(icon: Icon(Icons.local_library_outlined), label: 'Библиотека'),
+        BottomNavigationBarItem(icon: Icon(Icons.forum_outlined), label: 'Сообщество'),
         BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined), label: 'Магазин'),
       ],
       onTap: (index) {

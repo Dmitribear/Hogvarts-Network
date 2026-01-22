@@ -77,8 +77,8 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final menu = [
       ('Новости', '/home/news'),
-      ('Курсы', '/home/library'),
-      ('Форум', '/home/forum'),
+      ('Библиотека', '/home/library'),
+      ('Сообщество', '/home/forum'),
       ('Магазин', '/home/shop'),
       ('Профиль', '/home/profile'),
     ];
@@ -92,7 +92,7 @@ class _TopBar extends StatelessWidget {
               const Icon(Icons.castle, color: AppColors.gold, size: 24),
               const SizedBox(width: 10),
               Text(
-                'Hogwarts Network',
+              'Wizarding Hub',
                 style: textTheme.titleMedium?.copyWith(
                   color: AppColors.parchment.withOpacity(0.9),
                   letterSpacing: 1.05,
@@ -142,7 +142,7 @@ class _TopBar extends StatelessWidget {
             const Icon(Icons.castle, color: AppColors.gold, size: 24),
             const SizedBox(width: 10),
             Text(
-              'Hogwarts Network',
+              'Wizarding Hub',
               style: textTheme.titleMedium?.copyWith(
                 color: AppColors.parchment.withOpacity(0.9),
                 letterSpacing: 1.05,
@@ -195,18 +195,25 @@ class _HeroCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
       child: Stack(
         children: [
-          Container(
+          const SizedBox(
             width: double.infinity,
             height: 260,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF1A1F4B),
-                  Color(0xFF2A2E64),
-                  Color(0xFF3D2A7A),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+            child: _AssetImage(
+              asset: 'assets/images/bg_main.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.72),
+                    Colors.black.withOpacity(0.35),
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
               ),
             ),
           ),
@@ -374,7 +381,7 @@ class _TilesGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - 16) / 3;
+        final cardWidth = (constraints.maxWidth - 24) / 2;
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -394,6 +401,30 @@ class _TilesGrid extends StatelessWidget {
                 onTap: () => onNavigate('/home/news'),
                 width: cardWidth,
               ),
+              const SizedBox(width: 8),
+              _TileCard(
+                title: 'Сообщество',
+                subtitle: 'Форум и обсуждения',
+                imageAsset: 'assets/images/card_forum.jpg',
+                onTap: () => onNavigate('/home/forum'),
+                width: cardWidth,
+              ),
+              const SizedBox(width: 8),
+              _TileCard(
+                title: 'Квизы и задания',
+                subtitle: 'Проверь знания, получи бейджи',
+                imageAsset: 'assets/images/card_courses.jpg',
+                onTap: () => onNavigate('/home/tasks'),
+                width: cardWidth,
+              ),
+              const SizedBox(width: 8),
+              _TileCard(
+                title: 'Профиль и кастомизация',
+                subtitle: 'Аватар, палочка, Патронус',
+                imageAsset: 'assets/images/card_forum.jpg',
+                onTap: () => onNavigate('/home/profile'),
+                width: cardWidth,
+              ),
             ],
           ),
         );
@@ -411,11 +442,11 @@ class _FeaturesList extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       ('Поиск персонажей', 'Карточки, биография, статы из API'),
-      ('Создать профиль', 'Аватар, факультет, прогресс'),
-      ('Своя палочка и Патронус', 'Персонализация и коллекции'),
-      ('Чтение книг и лор', 'Разделы книги и материалы'),
-      ('Квизы и достижения', 'Соревнуйся и получай бейджи'),
-      ('Новости и сообщество', 'События, форум, обсуждения'),
+      ('Профиль и интересы', 'Аватар, подборки, рекомендации'),
+      ('Квизы и тесты', 'Самопроверка, бейджи, прогресс'),
+      ('Книги и статьи', 'Чтение материалов, подборки, лонгриды'),
+      ('Сообщество', 'Форумы, обсуждения, вопросы-ответы'),
+      ('Магазин', 'Книги, мерч, постеры, аксессуары'),
     ];
     return Column(
       children: items
@@ -539,9 +570,9 @@ class _NewsRow extends StatelessWidget {
   _NewsRow({super.key});
 
   final _items = const [
-    ('Обновление API персонажей', 'Свежие данные по героям'),
-    ('Квиз по заклинаниям', 'Проверь знания и заработай награды'),
-    ('Гид по Патронусам', 'Как подобрать и кастомизировать'),
+    ('Обновление API персонажей', 'Свежие данные и карточки'),
+    ('Квиз по лору', 'Проверь знания книг и фильмов'),
+    ('Новая подборка статей', 'Лучшие материалы недели'),
   ];
 
   @override
