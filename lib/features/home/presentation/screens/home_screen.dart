@@ -585,7 +585,7 @@ class _NewsRow extends StatelessWidget {
             (e) => Expanded(
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => Navigator.of(context).pushNamed('/home/news'),
+                onTap: () => context.go('/home/news'),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 6),
                   padding: const EdgeInsets.all(12),

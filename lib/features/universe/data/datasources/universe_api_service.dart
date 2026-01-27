@@ -13,9 +13,29 @@ class UniverseApiService {
 
   Future<List<CharacterDto>> getCharacters() async {
     try {
-      final response = await _dio.get(ApiConstants.characters);
-      final data = response.data as List<dynamic>;
-      return data.map((json) => CharacterDto.fromJson(json as Map<String, dynamic>)).toList();
+      final List<dynamic> aggregated = [];
+
+      // primary remote (relative to dio.baseUrl)
+      try {
+        final response = await _dio.get(ApiConstants.characters);
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+
+      // attempt local backend
+      try {
+        final localResp = await _dio.get('${ApiConstants.localBaseUrl}${ApiConstants.characters}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+
+      // dedupe by name (fallback to stringified json when name missing)
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? (map['id']?.toString()) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+
+      return unique.values.map((json) => CharacterDto.fromJson(json)).toList();
     } catch (e) {
       throw AppException('Не удалось загрузить персонажей: $e');
     }
@@ -23,9 +43,26 @@ class UniverseApiService {
 
   Future<List<SpellDto>> getSpells() async {
     try {
-      final response = await _dio.get(ApiConstants.spells);
-      final data = response.data as List<dynamic>;
-      return data.map((json) => SpellDto.fromJson(json as Map<String, dynamic>)).toList();
+      final List<dynamic> aggregated = [];
+
+      try {
+        final response = await _dio.get(ApiConstants.spells);
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+
+      try {
+        final localResp = await _dio.get('${ApiConstants.localBaseUrl}${ApiConstants.spells}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+
+      return unique.values.map((json) => SpellDto.fromJson(json)).toList();
     } catch (e) {
       throw AppException('Не удалось загрузить заклинания: $e');
     }
@@ -33,9 +70,26 @@ class UniverseApiService {
 
   Future<List<HouseDto>> getHouses() async {
     try {
-      final response = await _dio.get(ApiConstants.houses);
-      final data = response.data as List<dynamic>;
-      return data.map((json) => HouseDto.fromJson(json as Map<String, dynamic>)).toList();
+      final List<dynamic> aggregated = [];
+
+      try {
+        final response = await _dio.get(ApiConstants.houses);
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+
+      try {
+        final localResp = await _dio.get('${ApiConstants.localBaseUrl}${ApiConstants.houses}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+
+      return unique.values.map((json) => HouseDto.fromJson(json)).toList();
     } catch (e) {
       throw AppException('Не удалось загрузить факультеты: $e');
     }

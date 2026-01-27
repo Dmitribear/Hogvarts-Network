@@ -10,18 +10,18 @@ class NewsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final items = [
-      _News('Фестиваль в Хогсмиде', '21 апреля 2024',
-          'Тёплый вечер, музыка и сливочное пиво у Три Метлы.'),
-      _News('Новые зелеварные рецепты', '18 апреля 2024',
-          'Профессор Слизнорт делится улучшенной формулой Животворящего.'),
-      _News('Турнир по квиддичу', '15 апреля 2024',
-          'Гриффиндор vs Слизерин — решающий матч сезона.'),
+      _News('Подборка: книги и лор', 'Свежие главы, статьи и материалы.',
+          'Апрель 2024'),
+      _News('Гид: как искать персонажей', 'Фильтры по домам, ролям, сезонам.',
+          'Апрель 2024'),
+      _News('Квизы: новая коллекция', 'Самопроверка по лору и фильмам.',
+          'Март 2024'),
     ];
 
     return Scaffold(
       backgroundColor: AppColors.navy,
       appBar: AppBar(
-        title: const Text('Новости'),
+        title: const Text('Книги и лор'),
         backgroundColor: Colors.black.withOpacity(0.6),
       ),
       body: ListView.separated(
@@ -42,7 +42,7 @@ class NewsScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.newspaper, color: AppColors.gold.withOpacity(0.9)),
+                    Icon(Icons.menu_book, color: AppColors.gold.withOpacity(0.9)),
                     const SizedBox(width: 8),
                     Text(
                       item.date,
@@ -74,9 +74,9 @@ class NewsScreen extends StatelessWidget {
 }
 
 class _News {
-  _News(this.title, this.date, this.body);
+  _News(this.title, this.body, this.date);
 
   final String title;
-  final String date;
   final String body;
+  final String date;
 }
