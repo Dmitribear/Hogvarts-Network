@@ -16,6 +16,24 @@ class UniverseRepositoryImpl implements UniverseRepository {
   }
 
   @override
+  Future<List<Character>> fetchStudents() async {
+    final result = await _api.getStudents();
+    return result.map((dto) => dto.toDomain()).toList();
+  }
+
+  @override
+  Future<List<Character>> fetchStaff() async {
+    final result = await _api.getStaff();
+    return result.map((dto) => dto.toDomain()).toList();
+  }
+
+  @override
+  Future<List<Character>> fetchCharactersByHouse(String house) async {
+    final result = await _api.getCharactersByHouse(house);
+    return result.map((dto) => dto.toDomain()).toList();
+  }
+
+  @override
   Future<List<Spell>> fetchSpells() async {
     final result = await _api.getSpells();
     return result.map((dto) => dto.toDomain()).toList();

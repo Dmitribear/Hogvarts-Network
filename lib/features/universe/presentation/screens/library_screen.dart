@@ -6,13 +6,23 @@ import '../../../home/presentation/widgets/app_bottom_nav.dart';
 import '../providers/universe_providers.dart';
 
 final _searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
+final _roleFilterProvider = StateProvider.autoDispose<String>((ref) => 'all'); // all/students/staff/house
+final _houseFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
 
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final characters = ref.watch(charactersProvider);
+    final role = ref.watch(_roleFilterProvider);
+    final selectedHouse = ref.watch(_houseFilterProvider);
+    final characters = switch (role) {
+      'students' => ref.watch(studentsProvider),
+      'staff' => ref.watch(staffProvider),
+      'house' when (selectedHouse != null && selectedHouse.isNotEmpty) =>
+        ref.watch(houseCharactersProvider(selectedHouse)),
+      _ => ref.watch(charactersProvider),
+    };
     final spells = ref.watch(spellsProvider);
     final houses = ref.watch(housesProvider);
     final query = ref.watch(_searchQueryProvider).trim().toLowerCase();
@@ -240,14 +250,15 @@ class _CharacterCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: image.isNotEmpty
-                ? Image.network(image, height: 100, width: double.infinity, fit: BoxFit.cover)
-                : Container(
-                    height: 100,
-                    width: double.infinity,
-                    color: Colors.black26,
-                    child: const Icon(Icons.person, size: 42),
-                  ),
+            child: AspectRatio(
+              aspectRatio: 4 / 5,
+              child: image.isNotEmpty
+                  ? Image.network(image, fit: BoxFit.cover)
+                  : Container(
+                      color: Colors.black26,
+                      child: const Icon(Icons.person, size: 42),
+                    ),
+            ),
           ),
           const SizedBox(height: 8),
           Text(name, style: textTheme.titleMedium),
@@ -318,6 +329,75 @@ class _SearchFieldState extends State<_SearchField> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.gold, width: 1.4),
         ),
+      ),
+    );
+  }
+}
+
+class _FiltersBar extends ConsumerWidget {
+  const _FiltersBar({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(_roleFilterProvider);
+    final houses = ref.watch(housesProvider);
+    final selectedHouse = ref.watch(_houseFilterProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          children: [
+            _roleChip(ref, 'Все', 'all'),
+            _roleChip(ref, 'Студенты', 'students'),
+            _roleChip(ref, 'Преподаватели', 'staff'),
+            _roleChip(ref, 'По факультету', 'house'),
+          ],
+        ),
+        if (role == 'house')
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: houses.when(
+              data: (items) {
+                final names = items.map((h) => h.name).toList();
+                return DropdownButtonFormField<String>(
+                  value: selectedHouse?.isNotEmpty == true ? selectedHouse : null,
+                  decoration: InputDecoration(
+                    hintText: 'Выберите факультет',
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                    ),
+                  ),
+                  items: names
+                      .map((h) => DropdownMenuItem<String>(
+                            value: h,
+                            child: Text(h),
+                          ))
+                      .toList(),
+                  onChanged: (v) => ref.read(_houseFilterProvider.notifier).state = v,
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _roleChip(WidgetRef ref, String label, String value) {
+    final current = ref.watch(_roleFilterProvider);
+    return ChoiceChip(
+      label: Text(label),
+      selected: current == value,
+      onSelected: (_) => ref.read(_roleFilterProvider.notifier).state = value,
+      selectedColor: AppColors.gold.withOpacity(0.2),
+      backgroundColor: Colors.white.withOpacity(0.05),
+      labelStyle: TextStyle(
+        color: AppColors.parchment,
       ),
     );
   }

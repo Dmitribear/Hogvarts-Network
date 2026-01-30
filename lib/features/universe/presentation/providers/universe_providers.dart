@@ -21,6 +21,22 @@ final charactersProvider = FutureProvider<List<Character>>((ref) async {
   return repo.fetchCharacters();
 });
 
+final studentsProvider = FutureProvider<List<Character>>((ref) async {
+  final repo = await ref.watch(universeRepositoryProvider.future);
+  return repo.fetchStudents();
+});
+
+final staffProvider = FutureProvider<List<Character>>((ref) async {
+  final repo = await ref.watch(universeRepositoryProvider.future);
+  return repo.fetchStaff();
+});
+
+final houseCharactersProvider =
+    FutureProvider.family<List<Character>, String>((ref, house) async {
+  final repo = await ref.watch(universeRepositoryProvider.future);
+  return repo.fetchCharactersByHouse(house);
+});
+
 final spellsProvider = FutureProvider<List<Spell>>((ref) async {
   final repo = await ref.watch(universeRepositoryProvider.future);
   return repo.fetchSpells();

@@ -41,6 +41,78 @@ class UniverseApiService {
     }
   }
 
+  Future<List<CharacterDto>> getStudents() async {
+    try {
+      final List<dynamic> aggregated = [];
+      try {
+        final response = await _dio.get(ApiConstants.students);
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+      try {
+        final localResp =
+            await _dio.get('${ApiConstants.localBaseUrl}${ApiConstants.students}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? (map['id']?.toString()) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+      return unique.values.map((json) => CharacterDto.fromJson(json)).toList();
+    } catch (e) {
+      throw AppException('Не удалось загрузить студентов: $e');
+    }
+  }
+
+  Future<List<CharacterDto>> getStaff() async {
+    try {
+      final List<dynamic> aggregated = [];
+      try {
+        final response = await _dio.get(ApiConstants.staff);
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+      try {
+        final localResp =
+            await _dio.get('${ApiConstants.localBaseUrl}${ApiConstants.staff}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? (map['id']?.toString()) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+      return unique.values.map((json) => CharacterDto.fromJson(json)).toList();
+    } catch (e) {
+      throw AppException('Не удалось загрузить преподавателей: $e');
+    }
+  }
+
+  Future<List<CharacterDto>> getCharactersByHouse(String house) async {
+    try {
+      final List<dynamic> aggregated = [];
+      try {
+        final response = await _dio.get(ApiConstants.charactersByHouse(house));
+        if (response.data is List) aggregated.addAll(response.data as List<dynamic>);
+      } catch (_) {}
+      try {
+        final localResp = await _dio
+            .get('${ApiConstants.localBaseUrl}${ApiConstants.charactersByHouse(house)}');
+        if (localResp.data is List) aggregated.addAll(localResp.data as List<dynamic>);
+      } catch (_) {}
+      final Map<String, Map<String, dynamic>> unique = {};
+      for (final item in aggregated) {
+        final map = item as Map<String, dynamic>;
+        final key = (map['name'] as String?) ?? (map['id']?.toString()) ?? map.toString();
+        unique.putIfAbsent(key, () => map);
+      }
+      return unique.values.map((json) => CharacterDto.fromJson(json)).toList();
+    } catch (e) {
+      throw AppException('Не удалось загрузить персонажей факультета: $e');
+    }
+  }
+
   Future<List<SpellDto>> getSpells() async {
     try {
       final List<dynamic> aggregated = [];
