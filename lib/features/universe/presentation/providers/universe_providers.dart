@@ -7,6 +7,7 @@ import '../../data/repositories/universe_repository_impl.dart';
 import '../../domain/entities/character.dart';
 import '../../domain/entities/house.dart';
 import '../../domain/entities/spell.dart';
+import '../../domain/entities/creature.dart';
 import '../../domain/repositories/universe_repository.dart';
 
 final dioProvider = FutureProvider<Dio>((ref) async => DioClient.create());
@@ -45,4 +46,9 @@ final spellsProvider = FutureProvider<List<Spell>>((ref) async {
 final housesProvider = FutureProvider<List<House>>((ref) async {
   final repo = await ref.watch(universeRepositoryProvider.future);
   return repo.fetchHouses();
+});
+
+final creaturesProvider = FutureProvider<List<Creature>>((ref) async {
+  final repo = await ref.watch(universeRepositoryProvider.future);
+  return repo.fetchCreatures();
 });

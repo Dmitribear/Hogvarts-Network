@@ -6,6 +6,10 @@ class ApiConstants {
   static const houses = '/houses';
   static const students = '/characters/students';
   static const staff = '/characters/staff';
+  static const creatures = '/creatures';
+  // Альтернативный API (netlify open api)
+  static const altBaseUrl = 'https://harrypotterapi.onrender.com/api';
+  static const altCreatures = '$altBaseUrl/creatures';
   static String charactersByHouse(String house) => '/characters/house/$house';
 }
 

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../home/presentation/widgets/app_bottom_nav.dart';
 import '../providers/universe_providers.dart';
 import '../../domain/entities/spell.dart';
+import '../../domain/entities/creature.dart';
 
 final _searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 final _roleFilterProvider = StateProvider.autoDispose<String>((ref) => 'all'); // all/students/staff/house
@@ -48,6 +49,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     };
     final spells = ref.watch(spellsProvider);
     final houses = ref.watch(housesProvider);
+    final creatures = ref.watch(creaturesProvider);
     final query = ref.watch(_searchQueryProvider).trim().toLowerCase();
 
     return Scaffold(
@@ -93,11 +95,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                         separatorBuilder: (_, __) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final c = filtered[index];
-                          return _CharacterCard(
-                            name: c.name,
-                            house: c.house,
-                            patronus: c.patronus,
-                            image: c.image,
+                          return GestureDetector(
+                            onTap: () => _showCharacterModal(context, c),
+                            child: _CharacterCard(
+                              name: c.name,
+                              house: c.house,
+                              patronus: c.patronus,
+                              image: c.image,
+                            ),
                           );
                         },
                       ),
@@ -145,9 +150,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final s = filtered[index];
-                          return _SpellCard(
-                            spell: s,
-                            textTheme: Theme.of(context).textTheme,
+                          return GestureDetector(
+                            onTap: () => _showSpellModal(context, s),
+                            child: _SpellCard(
+                              spell: s,
+                              textTheme: Theme.of(context).textTheme,
+                            ),
                           );
                         },
                       ),
@@ -201,6 +209,83 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   title: 'Факультеты недоступны',
                   body:
                       'Запусти на поддерживаемой платформе или подставь web API для данных факультетов.',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _Section(
+              title: 'Фантастические существа',
+              child: creatures.when(
+                data: (items) {
+                  final filtered = query.isEmpty
+                      ? items
+                      : items
+                          .where((c) =>
+                              c.name.toLowerCase().contains(query) ||
+                              c.description.toLowerCase().contains(query))
+                          .toList();
+                  if (filtered.isEmpty) {
+                    return const _FallbackInfo(
+                      title: 'Ничего не найдено',
+                      body: 'Попробуй другой запрос.',
+                    );
+                  }
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: filtered
+                        .map(
+                          (cr) => GestureDetector(
+                            onTap: () => _showCreatureModal(context, cr),
+                            child: Container(
+                              width: 200,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                color: Colors.white.withOpacity(0.06),
+                                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.pets, color: AppColors.gold),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          cr.name,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(color: AppColors.parchment),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    cr.description,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: AppColors.parchment.withOpacity(0.8),
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const _FallbackInfo(
+                  title: 'Существа недоступны',
+                  body: 'Попробуй позже или другой источник данных.',
                 ),
               ),
             ),
@@ -508,4 +593,200 @@ class _SpellCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showCharacterModal(BuildContext context, dynamic c) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF0F172A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      final quotes = [
+        '“It does not do to dwell on dreams and forget to live.”',
+        '“Happiness can be found even in the darkest of times.”',
+      ];
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 16,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 120,
+                      width: 90,
+                      child: (c.image as String).isNotEmpty
+                          ? Image.network(c.image, fit: BoxFit.cover)
+                          : Container(
+                              color: Colors.white10,
+                              child: const Icon(Icons.person, size: 40),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(c.name, style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 6),
+                        Text('Факультет: ${c.house.isEmpty ? '—' : c.house}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: AppColors.gold)),
+                        if ((c.patronus as String).isNotEmpty)
+                          Text('Патронус: ${c.patronus}',
+                              style: Theme.of(context).textTheme.bodyMedium),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text('Популярные цитаты', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              ...quotes
+                  .map(
+                    (q) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        q,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.white70),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void _showSpellModal(BuildContext context, Spell spell) {
+  final refs = [
+    'Упоминание: урок Заклинаний (профессор Флитвик).',
+    'Часто используют авроры и преподаватели.',
+  ];
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF0F172A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 16,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: AppColors.gold),
+                  const SizedBox(width: 8),
+                  Text(spell.name, style: Theme.of(context).textTheme.titleLarge),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                spell.description,
+                style:
+                    Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 12),
+              Text('Упоминания', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 6),
+              ...refs
+                  .map(
+                    (r) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        '• $r',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.white70),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void _showCreatureModal(BuildContext context, Creature cr) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF0F172A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pets, color: AppColors.gold),
+                const SizedBox(width: 8),
+                Text(cr.name, style: Theme.of(context).textTheme.titleLarge),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              cr.description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            if (cr.image.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  cr.image,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+          ],
+        ),
+      );
+    },
+  );
 }

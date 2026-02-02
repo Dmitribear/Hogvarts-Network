@@ -10,12 +10,21 @@ class ShopScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final items = [
-      _ShopItem('Книга о съёмках HP', 'Артбук, 320 стр.', '1 990 ₽', 'book.jpg'),
-      _ShopItem('Постер Хогвартса', 'Формат A2, матовая бумага', '690 ₽', 'map.jpg'),
-      _ShopItem('Хогвартс-экспресс', 'Металлический значок', '490 ₽', 'train.jpg'),
-      _ShopItem('Кулинарная книга HP', 'С рецептами, полноцвет', '1 290 ₽', 'book.jpg'),
-      _ShopItem('Светильник в виде замка', 'Настольный, USB', '2 490 ₽', 'bg_main.jpg'),
-      _ShopItem('Худи фандом', 'Черный, принт Hogwarts', '3 490 ₽', 'hall.jpg'),
+      _ShopItem('Книга о съёмках HP', 'Артбук, 320 стр.', '1 990 ₽',
+          '000503926dba473ea9ccabbb23705041.webp'),
+      _ShopItem('Постер Хогвартса', 'Формат A2, матовая бумага', '690 ₽',
+          'Hogwarts-Express-1-1024x635.jpg'),
+      _ShopItem('Хогвартс-экспресс', 'Металлический значок', '490 ₽', 'images (64).jfif'),
+      _ShopItem('Кулинарная книга HP', 'С рецептами, полноцвет', '1 290 ₽',
+          '25fDAOTDkC2lIef7QqHF0v9fTJ-0Qis_.jpg'),
+      _ShopItem('Светильник в виде замка', 'Настольный, USB', '2 490 ₽',
+          '391b1e7d4bf64d8da69fc4592f4a9bf7.webp'),
+      _ShopItem('Худи фандом', 'Черный, принт Hogwarts', '3 490 ₽', 'images (65).jfif'),
+      _ShopItem('Шарф в цветах факультета', 'Мягкий акрил, зима', '1 290 ₽', 'images (66).jfif'),
+      _ShopItem('Коллекционная палочка', 'Реплика, коробка-пенал', '2 990 ₽', 'images (67).jfif'),
+      _ShopItem('Кружка Hogwarts', 'Керамика, 350 мл', '690 ₽', 'images (68).jfif'),
+      _ShopItem('Лава-лампа с символикой', 'Амбиентное освещение', '1 990 ₽',
+          'istockphoto-1342209784-612x612.jpg'),
     ];
 
     return Scaffold(
@@ -30,19 +39,28 @@ class ShopScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/Hogwarts-Express-1-1024x635.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.12,
+          ),
         ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return _ShopCard(item: item, textTheme: textTheme);
-        },
+        child: GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return _ShopCard(item: item, textTheme: textTheme);
+          },
+        ),
       ),
       bottomNavigationBar: const AppBottomNav(currentIndex: 3),
     );
@@ -86,6 +104,10 @@ class _ShopCard extends StatelessWidget {
                 child: Image.asset(
                   'assets/images/${item.asset}',
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.black26,
+                    child: const Icon(Icons.image_not_supported, color: Colors.white54),
+                  ),
                 ),
               ),
             ),

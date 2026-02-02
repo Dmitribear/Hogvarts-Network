@@ -1,8 +1,10 @@
 import '../../domain/entities/character.dart';
 import '../../domain/entities/house.dart';
 import '../../domain/entities/spell.dart';
+import '../../domain/entities/creature.dart';
 import '../../domain/repositories/universe_repository.dart';
 import '../datasources/universe_api_service.dart';
+import '../mappers/creature_mapper.dart';
 
 class UniverseRepositoryImpl implements UniverseRepository {
   UniverseRepositoryImpl(this._api);
@@ -43,5 +45,11 @@ class UniverseRepositoryImpl implements UniverseRepository {
   Future<List<House>> fetchHouses() async {
     final result = await _api.getHouses();
     return result.map((dto) => dto.toDomain()).toList();
+  }
+
+  @override
+  Future<List<Creature>> fetchCreatures() async {
+    final result = await _api.getCreatures();
+    return result.map((dto) => dto.toEntity()).toList();
   }
 }

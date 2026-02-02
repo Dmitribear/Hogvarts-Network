@@ -32,4 +32,10 @@ class FanProfileNotifier extends StateNotifier<AsyncValue<FanProfile?>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> update(FanProfile Function(FanProfile? current) updater) async {
+    final current = state.valueOrNull;
+    final next = updater(current);
+    await save(next);
+  }
 }
