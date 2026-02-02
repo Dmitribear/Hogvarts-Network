@@ -4,16 +4,39 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../home/presentation/widgets/app_bottom_nav.dart';
 import '../providers/universe_providers.dart';
+import '../../domain/entities/spell.dart';
 
 final _searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 final _roleFilterProvider = StateProvider.autoDispose<String>((ref) => 'all'); // all/students/staff/house
 final _houseFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
 
-class LibraryScreen extends ConsumerWidget {
+class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LibraryScreen> createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends ConsumerState<LibraryScreen> {
+  late final ScrollController _charactersController;
+  late final ScrollController _spellsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _charactersController = ScrollController();
+    _spellsController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _charactersController.dispose();
+    _spellsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final role = ref.watch(_roleFilterProvider);
     final selectedHouse = ref.watch(_houseFilterProvider);
     final characters = switch (role) {
@@ -56,20 +79,28 @@ class LibraryScreen extends ConsumerWidget {
                     );
                   }
                   return SizedBox(
-                    height: 200,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: filtered.length.clamp(0, 10),
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final c = filtered[index];
-                        return _CharacterCard(
-                          name: c.name,
-                          house: c.house,
-                          patronus: c.patronus,
-                          image: c.image,
-                        );
-                      },
+                    height: 180,
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      thickness: 6,
+                      radius: const Radius.circular(10),
+                      controller: _charactersController,
+                      child: ListView.separated(
+                        controller: _charactersController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: filtered.length.clamp(0, 20),
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final c = filtered[index];
+                          return _CharacterCard(
+                            name: c.name,
+                            house: c.house,
+                            patronus: c.patronus,
+                            image: c.image,
+                          );
+                        },
+                      ),
                     ),
                   );
                 },
@@ -99,15 +130,28 @@ class LibraryScreen extends ConsumerWidget {
                       body: 'Попробуй другой запрос или раздел.',
                     );
                   }
-                  return Column(
-                    children: filtered.take(8).map((s) {
-                      return ListTile(
-                        title: Text(s.name),
-                        subtitle: Text(s.description),
-                        leading:
-                            const Icon(Icons.auto_awesome, color: AppColors.gold),
-                      );
-                    }).toList(),
+                  return SizedBox(
+                    height: 200,
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      thickness: 6,
+                      radius: const Radius.circular(10),
+                      controller: _spellsController,
+                      child: ListView.separated(
+                        controller: _spellsController,
+                        scrollDirection: Axis.vertical,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: filtered.length.clamp(0, 20),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final s = filtered[index];
+                          return _SpellCard(
+                            spell: s,
+                            textTheme: Theme.of(context).textTheme,
+                          );
+                        },
+                      ),
+                    ),
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -238,8 +282,8 @@ class _CharacterCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      width: 180,
-      padding: const EdgeInsets.all(12),
+      width: 140,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: Colors.white.withOpacity(0.06),
@@ -250,8 +294,9 @@ class _CharacterCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: AspectRatio(
-              aspectRatio: 4 / 5,
+            child: SizedBox(
+              height: 80,
+              width: double.infinity,
               child: image.isNotEmpty
                   ? Image.network(image, fit: BoxFit.cover)
                   : Container(
@@ -261,10 +306,24 @@ class _CharacterCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(name, style: textTheme.titleMedium),
-          Text(house, style: textTheme.bodySmall?.copyWith(color: AppColors.gold)),
-          Text('Патронус: $patronus',
-              style: textTheme.bodySmall?.copyWith(color: Colors.white70)),
+          Text(
+            name,
+            style: textTheme.titleMedium,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            house,
+            style: textTheme.bodySmall?.copyWith(color: AppColors.gold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            patronus.isNotEmpty ? 'Патронус: $patronus' : 'Патронус: —',
+            style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -398,6 +457,54 @@ class _FiltersBar extends ConsumerWidget {
       backgroundColor: Colors.white.withOpacity(0.05),
       labelStyle: TextStyle(
         color: AppColors.parchment,
+      ),
+    );
+  }
+}
+
+class _SpellCard extends StatelessWidget {
+  const _SpellCard({required this.spell, required this.textTheme});
+
+  final Spell spell;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: Colors.white.withOpacity(0.06),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.gold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  spell.name,
+                  style: textTheme.titleMedium
+                      ?.copyWith(color: AppColors.parchment),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            spell.description,
+            style: textTheme.bodySmall
+                ?.copyWith(color: AppColors.parchment.withOpacity(0.8)),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
